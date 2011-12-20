@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\3rdparty\tilde\HostConfig.cpp" />
+    <ClCompile Include="..\..\3rdparty\tilde\LuaDebugger.cpp" />
+    <ClCompile Include="..\..\3rdparty\tilde\LuaDebuggerComms.cpp" />
+    <ClCompile Include="..\..\3rdparty\tilde\LuaHostWindows.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\3rdparty\tilde\HostConfig.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\LuaDebugger.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\LuaDebuggerComms.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\LuaDebuggerHost.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\LuaDebuggerProtocol.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\LuaHostWindows.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\ReceiveMessageBuffer.h" />
+    <ClInclude Include="..\..\3rdparty\tilde\SendMessageBuffer.h" />
+  </ItemGroup>
+</Project>
