@@ -8,6 +8,14 @@
 
 #define UNUSED(p) (( void )p)
 
+extern "C" {
+#include <lua.h>
+}
+#if LUA_TILDE_DEBUGGER
+#include <LuaHostWindows.h>
+tilde::LuaHostWindows* g_tildeHost;
+#endif /* LUA_TILDE_DEBUGGER */
+
 #ifdef GLUTHOST_USE_DEBUGGER
 	#include <aku/AKU-debugger.h>
 #endif
@@ -27,6 +35,7 @@
 #ifdef GLUTHOST_USE_PARTICLE_PRESETS
 	#include <ParticlePresets.h>
 #endif
+
 
 #ifdef _WIN32
 	#include <glut.h>
@@ -168,7 +177,11 @@ static void _onTimer ( int millisec ) {
 	#ifdef AKUGLUT_USE_FMOD
 		AKUFmodUpdate ();
 	#endif
-	
+
+	#if LUA_TILDE_DEBUGGER
+		g_tildeHost->Poll();
+	#endif // LUA_TILDE_DEBUGGER
+
 	glutPostRedisplay ();
 }
 
@@ -298,9 +311,48 @@ int GlutHost ( int argc, char** argv ) {
 		AKUDebugHarnessInit ();
 	#endif
 
+#if LUA_TILDE_DEBUGGER
+	lua_State* L = AKUGetLuaState ();
+	lua_getglobal ( L, "package" );		// package
+
+	char buffer[ _MAX_PATH ];
+	getcwd( buffer, sizeof( buffer ) );
+	lua_pushstring( L, buffer );		// package cwd
+
+	lua_pushstring( L, "/?.lua;" );		// package cwd /?.lua
+	lua_getfield( L, -3, "path" );		// package cwd /?.lua package.path
+	lua_concat( L, 3 );					// package path
+	lua_setfield( L, -2, "path" );		// package
+	lua_pop( L, 1 );
+
+	g_tildeHost = new tilde::LuaHostWindows();
+	g_tildeHost->RegisterState("Main", L);
+
+	for ( int i = 1; i < argc; ++i ) {
+		if ( strcmp( argv[ i ], "-debug" ) == 0 ) {
+			g_tildeHost->WaitForDebuggerConnection();
+			break;
+		}
+	}
+
+	for ( int i = 1; i < argc; ++i ) {
+		if ( argv[i][0] == '-' )
+			continue;
+#if _MSC_VER
+		char buffer[4096];
+		if ( argv[i] ) {
+			_fullpath(buffer, argv[i], 4096);
+		}
+		AKURunScript ( buffer);
+#else
+		AKURunScript ( argv [ i ]);
+#endif // _MSC_VER
+	}
+#else // !LUA_TILDE_DEBUGGER
 	for ( int i = 1; i < argc; ++i ) {
 		AKURunScript ( argv [ i ]);
 	}
+#endif // LUA_TILDE_DEBUGGER
 	
 	if ( sHasWindow ) {
 		glutTimerFunc ( 0, _onTimer, 0 );
